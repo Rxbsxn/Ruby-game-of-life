@@ -4,9 +4,8 @@ module GameOfLife
   class World
     attr_accessor :cells, :board
 
-    def initialize(width, height)
-      @width = width
-      @height = height
+    def initialize(width,height)
+      @width, @height = width, height
       setup(false)
     end
 
@@ -16,23 +15,23 @@ module GameOfLife
     end
 
     def live_cells
-      @cells.select(&:alive?)
+      @cells.select { |cell| cell.alive? }
     end
 
     def dead_cells
-      @cells.select(&:dead?)
+      @cells.select { |cell| cell.dead? }
     end
 
-    def kill(x, y)
-      @board.element(x, y).die!
+    def kill(x,y)
+      @board.element(x,y).die!
     end
 
-    def get(x, y)
-      @board.element(x, y)
+    def get(x,y)
+      @board.element(x,y)
     end
 
-    def revive(x, y)
-      @board.element(x, y).reborn!
+    def revive(x,y)
+      @board.element(x,y).reborn!
     end
 
     def live_neighbours_of(x,y)
@@ -94,32 +93,33 @@ module GameOfLife
       future_dead_cells = []
 
       @cells.each do |cell|
-        live_neighbours = live_neighbours_of(cell.x, cell.y)
+        live_neighbours = live_neighbours_of(cell.x,cell.y)
 
-        future_dead_cells << cell if apply_rule_1(cell, live_neighbours)
-        future_alive_cells << cell if apply_rule_2(cell, live_neighbours)
-        future_dead_cells << cell if apply_rule_3(cell, live_neighbours)
-        future_alive_cells << cell if apply_rule_4(cell, live_neighbours)
+        future_dead_cells << cell if apply_rule_1(cell,live_neighbours)
+        future_alive_cells << cell if apply_rule_2(cell,live_neighbours)
+        future_dead_cells << cell if apply_rule_3(cell,live_neighbours)
+        future_alive_cells << cell if apply_rule_4(cell,live_neighbours)
       end
 
-      update_board(future_alive_cells, future_dead_cells)
+      update_board(future_alive_cells,future_dead_cells)
       update_cells
     end
 
-    def apply_rule_1(cell, live_neighbours)
-      cell.alive? && live_neighbours.count < 2
+    private
+    def apply_rule_1(cell,live_neighbours)
+      cell.alive? and live_neighbours.count < 2
     end
 
-    def apply_rule_2(cell, live_neighbours)
-      cell.alive? && (live_neighbours.count == 2 || live_neighbours.count == 3)
+    def apply_rule_2(cell,live_neighbours)
+      cell.alive? and (live_neighbours.count == 2 or live_neighbours.count == 3)
     end
 
-    def apply_rule_3(cell, live_neighbours)
-      cell.dead? && live_neighbours.count > 3
+    def apply_rule_3(cell,live_neighbours)
+      cell.alive? and live_neighbours.count > 3
     end
 
-    def apply_rule_4(cell, live_neighbours)
-      cell.dead? && live_neighbours.count == 3
+    def apply_rule_4(cell,live_neighbours)
+      cell.dead? and live_neighbours.count == 3
     end
 
     def setup(random)
@@ -133,14 +133,13 @@ module GameOfLife
 
       update_cells
     end
-    
-    def update_board(to_live, to_die)
-      to_live.each do |cell|
-        revive(cell.x, cell.y)
-      end
 
+    def update_board(to_live,to_die)
+      to_live.each do |cell|
+        revive(cell.x,cell.y)
+      end
       to_die.each do |cell|
-        kill(cell.x, cell.y)
+        kill(cell.x,cell.y)
       end
     end
 
@@ -149,8 +148,8 @@ module GameOfLife
     end
 
     def clean_cells
+      @cells = nil
       @board = nil
-      @board = nil
-        end
+    end
   end
 end
